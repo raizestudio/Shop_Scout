@@ -6,6 +6,7 @@ type DefaultInputProps = {
   name: string;
   classes: string;
   placeholder: string;
+  width: string;
   value: string;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   required: boolean;
@@ -21,7 +22,8 @@ const DefaultInput = (props: DefaultInputProps) => {
       placeholder={props.placeholder}
       value={props.value}
       onChange={props.onChange || (() => {})}
-      className={classNames(props.classes || "w-full py-3 px-6 m-0 rounded border-2 text-black placeholder:text-gray-400 focus:outline-none  transition duration-300 ease-in-out",
+      className={classNames(props.classes || "py-3 px-6 m-0 rounded border-2 text-black placeholder:text-gray-400 focus:outline-none  transition duration-300 ease-in-out",
+        props.width ?? "w-full",
         props.requiresValidation ? (props.isValid ? "focus:border-green-500" : "border-red-500") : "focus:border-teleMagenta"
       )}
       required={props.required || false}

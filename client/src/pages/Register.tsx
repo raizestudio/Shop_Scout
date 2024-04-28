@@ -58,7 +58,7 @@ const Register = () => {
         navigate("/login");
       })
       .catch((error) => {
-        console.log(error.response.data.error)
+        console.log(error)
         if (error.response.data.error) {
           setFormError(error.response.data.error);
         } else {

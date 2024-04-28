@@ -1,11 +1,11 @@
 export interface Product {
   title: string;
-  price: number;
+  price: number | string;
   currency: string;
-  image: string;
+  image: string | undefined;
   link: string;
-  reviews: number;
+  reviews: number | string;
   rating: string;
-  search_term: string;
-  website: string;
+  categories: string[];
+  websites: string[];
 }

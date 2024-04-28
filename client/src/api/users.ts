@@ -9,7 +9,7 @@ export const authenticate = async (username, password) => {
 };
 
 export const identifyUserByToken = async (token) => {
-  const axionsConfig = createAxiosConfig('POST', {}, `${process.env.REACT_APP_API_URL}:${process.env.REACT_APP_API_PORT}/api/v1/users/identify`, { token });
+  const axionsConfig = createAxiosConfig('POST', {"auth-token": token}, `${process.env.REACT_APP_API_URL}:${process.env.REACT_APP_API_PORT}/api/v1/users/identify`, { token });
   const response = await axios(axionsConfig);
 
   return response.data;
@@ -21,3 +21,10 @@ export const createAccount = async (email, username, password, firstName, lastNa
 
   return response.data;
 };
+
+export const refreshToken = async (refreshToken, access) => {
+  const axionsConfig = createAxiosConfig('POST', {'auth-token': access},`${process.env.REACT_APP_API_URL}:${process.env.REACT_APP_API_PORT}/api/v1/users/refresh`, { refreshToken });
+  const response = await axios(axionsConfig);
+
+  return response.data;
+}

@@ -10,8 +10,15 @@ import { Token, TokenRefresh, TokenBlacklist } from "@/models/tokenSchema";
 
 // Interfaces
 import { User } from "@/interfaces/User";
+import { AuthMiddlewareUserRequest } from "@/interfaces/Requests";
+
+// Middleware
+import authMiddleware from "@/middleware/authMiddleware";
 
 const authRouter = express.Router();
+const secret = process.env.TOKEN_SECRET
+
+
 
 /*
  * Issue a uuid and token for an anonymous user, 
@@ -170,21 +177,100 @@ authRouter.post("/auth", async (req: Request, res: Response) => {
  *  }
  * 
  */
-authRouter.post("/identify", async (req: Request, res: Response) => {
-  const { token } = req.body;
+authRouter.post("/identify", authMiddleware, async (req: Request, res: Response) => {
+  const reqWithUser = req as AuthMiddlewareUserRequest;
+  const user = reqWithUser.user;
 
-  if (!token) {
+  try {
+    const userDocument = await RegularUser.findOne({ _id: user._id });
+    res.send(userDocument);
+  } catch (err) {
+    console.log("Error", err)
     res.status(400).send({
-      error: "Token is required",
+      error: "Invalid token",
+    });
+  }
+});
+
+export default authRouter;
+
+authRouter.post("/refresh", async (req: Request, res: Response) => {
+  const { refreshToken, force } = req.body;
+  const token = req.header("auth-token");
+
+  if (!refreshToken || !token) {
+    res.status(400).send({
+      error: "Refresh and/or token is required",
     });
     return;
   }
 
-  const tokenInformation = jwt.verify(token, process.env.TOKEN_SECRET);
+  const refresh = await TokenRefresh.findOne({ token: refreshToken });
 
-  const user = await RegularUser.findOne({ _id: tokenInformation._id });
+  if (!refresh) {
+    res.status(400).send({
+      error: "Refresh token is not valid",
+    });
+    return;
+  }
 
-  res.send(user);
+  let userId: string | null = null;
+  let userDocument: any = {};
+  let decodedUser: any = {};
+
+  try {
+    const verified = jwt.verify(token, process.env.TOKEN_SECRET);  // TODO: add a force refresh option
+    decodedUser = jwt.decode(token);
+    console.log("decodedUser fisrt", decodedUser)
+    if (!force) {
+      res.status(400).send({
+        error: "Token is still valid",
+      });
+      return;
+    }
+    userDocument = await RegularUser.findOne({ _id: decodedUser._id });
+
+  } catch (err) {
+    if (err instanceof jwt.TokenExpiredError) {
+      decodedUser = jwt.decode(token);
+      console.log("decodedUser", decodedUser)
+      userDocument = await RegularUser.findOne({ _id: decodedUser._id });
+    }
+  }
+  
+  console.log("userId", userDocument._id)
+  console.log(refresh.userId)
+  if (!userDocument._id) {
+    res.status(400).send({
+      error: "Token is was not issued to a valid user",
+    });
+    return;
+  }
+
+  if (String(userDocument._id) !== String(refresh.userId)) {
+    res.status(400).send({
+      error: "Token does not match refresh token user",
+    });
+    return;
+  }
+
+  const accessToken = jwt.sign({ _id: userDocument._id }, process.env.TOKEN_SECRET, { expiresIn: "30m" });
+  const newRefreshToken = crypto.randomBytes(64).toString("hex");
+
+  await Token.create({
+    token: accessToken,
+    userId: userDocument._id,
+  });
+
+  await TokenBlacklist.create({
+    token: token,
+    userId: userDocument._id,
+    firstIssuedAt: decodedUser.iat,
+  });
+
+  await Token.deleteOne({ token: token }).exec();
+
+  await TokenRefresh.findOneAndUpdate({ token: refreshToken }, { token: newRefreshToken });
+
+  res.send({ accessToken, refreshToken: newRefreshToken });
 });
-
-export default authRouter;

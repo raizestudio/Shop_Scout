@@ -1,18 +1,28 @@
 import React from "react";
-import PropTypes from "prop-types";
+import { useSelector } from "react-redux";
+import classNames from "classnames";
 
-const DefaultLabel = ({ htmlFor, className, text }) => {
+type DefaultLabelProps = {
+  htmlFor: string,
+  classes: string,
+  text: string,
+};
+
+const DefaultLabel = (props: DefaultLabelProps) => {
+
+  const preferedTheme = useSelector((state) => state.user.preferedTheme);
+
   return (
-    <label htmlFor={htmlFor} className={className || "m-0 whitespace-nowrap text-white"}>
-      {text}
+    <label
+      htmlFor={props.htmlFor} 
+      className={classNames(
+        props.classes || "m-0 whitespace-nowrap",
+        preferedTheme === "dark" ? "text-lightWhite" : "text-darkBlack"
+      )}
+    >
+      {props.text}
     </label>
   );
 }
-
-DefaultLabel.propTypes = {
-  htmlFor: PropTypes.string,
-  className: PropTypes.string,
-  text: PropTypes.string,
-};
 
 export default DefaultLabel;

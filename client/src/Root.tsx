@@ -21,21 +21,55 @@ import NotFound from './pages/404';
 
 // Utils
 import themeHelper from './utils/themeHelper';
-import { identifyUserByToken } from './api/users';
+import { identifyUserByToken, refreshToken } from './api/users';
 
 const Root = () => {
   const dispatch = useDispatch();
 
   const isLoading = useSelector((state) => state.core.isLoading);
   
+  const refreshTokenHandle = async (refresh, access) => {
+    refreshToken(refresh, access)
+      .then((response) => {
+        if (response.error) {
+          throw new Error(response.error);
+        }
+        localStorage.setItem('access', response.access);
+        localStorage.setItem('refresh', response.refresh);
+      })
+      .catch((error) => {
+        if (error.response.data.error === 'Refresh token is not valid') {
+          dispatch(logUserOut());
+          dispatch(setIsLoading(false));
+        }
+      });
+  }
+  const identifyUser = async (token) => {
+    return identifyUserByToken(token)
+      .then((response) => {
+        if (response.error) {
+          throw new Error(response);
+        }
+        dispatch(logUserIn({username: response.username}));
+        dispatch(setUserInformation(response));
+        return true;
+      })
+      .catch((error) => {
+        if (error.response.data.error === 'Token expired') {
+          return false;
+        }
+      });
+  };
+
   useEffect(() => {
     dispatch(setIsLoading(true));
 
     let theme = localStorage.getItem('theme');
-    let accessToken = localStorage.getItem('access');
-    let refreshToken = localStorage.getItem('refresh');
+    let access = localStorage.getItem('access');
+    let refresh = localStorage.getItem('refresh');
+    let shouldRefresh = false;
 
-    if (!accessToken && !refreshToken) {
+    if (!access && !refresh) {
       // TODO: just make sure the global state is updated
       dispatch(logUserOut());
       dispatch(setIsLoading(false));
@@ -43,17 +77,27 @@ const Root = () => {
     } else {
       // let decoded = jwt(accessToken);
       
-      identifyUserByToken(accessToken)
-      .then((response) => {
-        dispatch(logUserIn({username: response.username}));
-        dispatch(setUserInformation(response));
-      })
-      .catch((error) => {
-        console.error(error);
-      })
-      .finally(() => {
+      identifyUser(access)
+        .then((response) => {
+          console.log("Response: ", response)
+          shouldRefresh = !response;
+        })
+      
+      if (!shouldRefresh) {
+        refreshTokenHandle(refresh, access)
+          .then(() => {
+            shouldRefresh = identifyUser()
+          })
+          .catch((error) => {
+            console.log("Error: ", error)
+          })
+          .finally(() => {
+            dispatch(setIsLoading(false));
+          });
+      } else {
         dispatch(setIsLoading(false));
-      });
+        
+      }
     }
     if (theme) {
       dispatch(setPreferedTheme(theme));

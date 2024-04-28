@@ -4,13 +4,15 @@ const searchSchema = new mongoose.Schema({
   searchTerm: { type: String, index: true },
   products: [String],
   isSearching: { type: Boolean, default: true },
+  status: { type: String, default: 'pending' },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
 
-export async function initSearchIntent() {
+export async function initSearchIntent(searchTerm: string) {
   console.log('Search intent initialized');
   const search = Search.create({
+    searchTerm,
   });
 
   return search;
@@ -30,6 +32,17 @@ export async function getSearchHistory(searchsIds: [string]) {
   return searchs;
 };
 
+export const updateStatus = async (searchId: string, status: string) => {
+  try {
+    const search: any = await Search.findOne({ _id: searchId });
+    search.status = status;
+    search.updatedAt = Date.now();
+    await search.save();
+    return search;
+  } catch (error) {
+    return null;
+  }
+}
 const Search = mongoose.model('Search', searchSchema);
 
 export { Search };

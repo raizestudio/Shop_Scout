@@ -1,14 +1,17 @@
 import express, { Request, Response } from "express";
 import authMiddleware from "@/middleware/authMiddleware";
-
 import jwt from "jsonwebtoken";
 
 // Models
 import { initSearchIntent, getSearchHistory } from "@/models/searchSchema";
 import { addSearchtoHistory, RegularUser } from "@/models/userSchema";
+import { findProductsById } from "@/models/productSchema";
 
 // Interfaces
 import { User } from "@/interfaces/User";
+
+// Jobs
+import { scheduleSearchJob } from "@/jobs/searchQueue";
 
 const searchsRouter = express.Router();
 
@@ -17,25 +20,19 @@ searchsRouter.post("/", authMiddleware, async (req: Request, res: Response) => {
   const { searchTerm, country, filter, topN, comparisonWebsites } = req.body;
   const token = req.header("auth-token");
 
-  
   const userId = jwt.decode(token);
-  console.log(userId);
 
-  if (token && userId) {
-  // if token is provided, save the search intent to the user's account
-    const search: any = await initSearchIntent();
+  const search: any = await initSearchIntent(searchTerm);
 
-    searchIntentCreated = await addSearchtoHistory(userId._id, search._id);
+  searchIntentCreated = await addSearchtoHistory(userId._id, search._id);
 
-    if (!searchIntentCreated) {
-      return res.status(400).send({ error: "Search intent could not be created" });
-    }
-    res.send(search);
+  // add search to the queue
+  scheduleSearchJob(search._id, searchTerm);
 
-  } else {
-    res.status(400).send({ error: "No token provided" });
+  if (!searchIntentCreated) {
+    return res.status(400).send({ error: "Search intent could not be created" });
   }
-
+  res.send(search);
 
 });
 
@@ -61,5 +58,42 @@ searchsRouter.get("/history", async (req: Request, res: Response) => {
   const searchs = await getSearchHistory(user?.searchHistory);
   res.send(searchs);
 });
+
+
+/*
+ * Search for a product in the database
+ * 
+ * POST /product
+ * Request body:
+ *  {
+ *    "searchTerm": ""
+ *  }
+ * 
+ * Response:
+ *  {
+ *    "searchResults": []
+ *  }
+ * 
+ */
+searchsRouter.get("/product", async (req: Request, res: Response) => {
+  const { searchTerm } = req.query;
+
+  if (typeof searchTerm !== 'string') {
+    return res.status(400).send({ error: "Invalid search term" });
+  }
+
+  if (!searchTerm) {
+    return res.status(400).send({ error: "Search term is required" });
+  }
+
+  const products = await findProductsById(searchTerm);
+
+  console.log("products", products);
+
+  if (!products) {
+    return res.send({ error: "No products found" });
+  }
+  res.send(products);
+}); 
 
 export default searchsRouter;

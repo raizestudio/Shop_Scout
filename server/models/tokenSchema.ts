@@ -17,6 +17,7 @@ const refreshTokenSchema = new Schema({
 const tokenBlacklistSchema = new Schema({
   token: { type: String, required: true },
   userId: { type: Schema.Types.ObjectId },
+  firstIssuedAt: { type: Date, required: true },
   createdAt: { type: Date, default: Date.now, expires: "30d" },
 });
 
