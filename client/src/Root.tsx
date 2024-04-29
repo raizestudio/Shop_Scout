@@ -38,6 +38,9 @@ const Root = () => {
         localStorage.setItem('refresh', response.refresh);
       })
       .catch((error) => {
+        if (!error.response) {
+          return;
+        }
         if (error.response.data.error === 'Refresh token is not valid') {
           dispatch(logUserOut());
           dispatch(setIsLoading(false));
@@ -62,7 +65,6 @@ const Root = () => {
   };
 
   useEffect(() => {
-    dispatch(setIsLoading(true));
 
     let theme = localStorage.getItem('theme');
     let access = localStorage.getItem('access');
@@ -78,12 +80,12 @@ const Root = () => {
       // let decoded = jwt(accessToken);
       
       identifyUser(access)
-        .then((response) => {
-          console.log("Response: ", response)
-          shouldRefresh = !response;
+        .then((result) => {
+          console.log("Response: ", result)
+          shouldRefresh = result;
         })
       
-      if (!shouldRefresh) {
+      if (shouldRefresh) {
         refreshTokenHandle(refresh, access)
           .then(() => {
             shouldRefresh = identifyUser()
@@ -91,21 +93,23 @@ const Root = () => {
           .catch((error) => {
             console.log("Error: ", error)
           })
-          .finally(() => {
-            dispatch(setIsLoading(false));
-          });
       } else {
-        dispatch(setIsLoading(false));
+        // dispatch(setIsLoading(false));
         
       }
     }
-    if (theme) {
-      dispatch(setPreferedTheme(theme));
-    } else {
-      dispatch(setPreferedTheme(themeHelper.getUserPreferedSchema()));
-    }
+    const p = new Promise((resolve, reject) => {
+      if (theme) {
+        dispatch(setPreferedTheme(theme));
+      } else {
+        dispatch(setPreferedTheme(themeHelper.getUserPreferedSchema()));
+      }
+      resolve();
+    })
     
-    
+    p.finally(() => {
+      dispatch(setIsLoading(false));
+    });
   }, [dispatch]);
 
   return (

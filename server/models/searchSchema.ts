@@ -28,7 +28,7 @@ export async function getSearchHistory(searchsIds: [string]) {
     search = await Search.findOne({ _id: searchId }).exec();
     searchs.push(search);
   }
-
+  searchs.reverse();
   return searchs;
 };
 

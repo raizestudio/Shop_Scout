@@ -39,14 +39,19 @@ agenda.define('performSearch', async (job) => {
       Search.updateOne({ _id: searchId }, { products: productIds });
     })
     .finally(async () => {
-      updateStatus(searchId, 'completed');
+      // updateStatus(searchId, 'completed');
+      setTimeout(() => {
+        updateStatus(searchId, 'completed');
+        console.log(`Finished search for ${searchTerm}`);
+
+      }, 15000);
     });
 
   // await new Promise<void>(resolve => setTimeout(() => {
   //   updateStatus(searchId, 'completed');
   //   resolve();
   // }, 15000));
-  console.log(`Finished search for ${searchTerm}`);
+  // console.log(`Finished search for ${searchTerm}`);
 });
 
 // Start Agenda

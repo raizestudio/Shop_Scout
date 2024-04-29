@@ -36,7 +36,17 @@ searchsRouter.post("/", authMiddleware, async (req: Request, res: Response) => {
 
 });
 
-
+/*
+ * Get the search history of a user
+ * 
+ * GET /history
+ * 
+ * Response:
+ *  {
+ *    "searchHistory": []
+ *  }
+ * 
+ */
 searchsRouter.get("/history", async (req: Request, res: Response) => {
   const token = req.header("auth-token");
 

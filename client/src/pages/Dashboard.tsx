@@ -32,7 +32,7 @@ const Dashboard = () => {
       .catch((error) => {
         console.error(error);
       });
-  }, []);
+  }, [])
   
   return (
     <div className={wrapperClasses}>
@@ -53,19 +53,30 @@ const Dashboard = () => {
             <DefaultButton text="New search" onClick={() => setShowNewSearchModal(true)} />
           </div>
           <div className="flex flex-col gap-4">
-            <span className="text-lg font-semibold">History {`(${searchHistory.length})`}</span>
-            <div className="flex flex-col gap-4 p-2 bg-lightWhite">
+            <span className={classNames(
+              'text-lg font-semibold',
+              preferedTheme === 'dark' ? 'text-darkerWhite' : 'text-darkerDark')}
+            >
+              History {`(${searchHistory.length})`}
+            </span>
+            <div className={classNames(
+              'flex flex-col gap-4 p-2',
+              preferedTheme === 'dark' ? 'bg-darkBlack' : 'bg-lightWhite',
+            )}>
               {
                 searchHistory.map((search, index) => {
                   return (
-                    <div key={search._id} className="flex flex-col px-2 py-1 rounded shadow bg-lighterWhite">
+                    <div key={search._id} className={classNames(
+                      'flex flex-col px-2 py-1 rounded shadow',
+                      preferedTheme === 'dark' ? 'bg-lighterDark' : 'bg-darkerWhite',
+                    )}>
                       <div className="flex justify-between px-2 py-0.5 bg-darkerWhite rounded">
                         <span>{search._id}</span>
                         <span>{search.createdAt}</span>
                       </div>
                       <div className="p-1">Product preview will go here</div>
                       <div className="flex justify-between ">
-                        <DefaultPills label={search.isSearching ? "Ongoing" : "Over"} classes={search.isSearching ? "bg-orangePantone" : "bg-mountainMeadowGreen"} />
+                        <DefaultPills label={search.status} classes={search.status === 'completed' ? 'bg-mountainMeadowGreen': search.status === 'pending' ? 'bg-orangePantone': search.status === 'error' ? 'bg-red-400': null} />
                         <span>{search.updatedAt}</span>
                       </div>
                     </div>
