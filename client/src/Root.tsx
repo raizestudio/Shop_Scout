@@ -58,6 +58,9 @@ const Root = () => {
         return true;
       })
       .catch((error) => {
+        if (!error.response) {
+          return;
+        };
         if (error.response.data.error === 'Token expired') {
           return false;
         }
@@ -124,13 +127,13 @@ const Root = () => {
         )
         : 
         (
-              <Routes>
-                <Route path="/" element={<Landing />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
         )
       }
     </>

@@ -22,6 +22,20 @@ const Dashboard = () => {
     'bg-lightWhite': preferedTheme === 'light',
   });
 
+  const translateStatus = (originStatus) => {
+    if (originStatus === 'completed' || originStatus === 'over') {
+      return 'success'
+    }
+
+    if (originStatus === 'pending') {
+      return 'warning'
+    }
+
+    if (originStatus === 'failed') {
+      return 'error'
+    }
+  }
+  
   useEffect(() => {
     const token = localStorage.getItem('access');
     getSearchHistory(token)
@@ -76,7 +90,7 @@ const Dashboard = () => {
                       </div>
                       <div className="p-1">Product preview will go here</div>
                       <div className="flex justify-between ">
-                        <DefaultPills label={search.status} classes={search.status === 'completed' ? 'bg-mountainMeadowGreen': search.status === 'pending' ? 'bg-orangePantone': search.status === 'error' ? 'bg-red-400': null} />
+                        <DefaultPills label={search.status} status={translateStatus(search.status)} />
                         <span>{search.updatedAt}</span>
                       </div>
                     </div>
