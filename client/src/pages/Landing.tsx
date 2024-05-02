@@ -19,7 +19,7 @@ const Landing = () => {
   const [isSearching, setIsSearching] = useState(false);
   const preferedTheme = useSelector((state) => state.user.preferedTheme);
 
-  const handleSearch = async ({ search_term, filter, topN, country, comparisonWebsites }) => {
+  const handleSearch = async ({ searchTerm, filter, topN, country, comparisonWebsites }) => {
     setIsSearching(true);
     setHasSearch(false);
 
@@ -29,7 +29,7 @@ const Landing = () => {
     }, 100);
 
     try {
-      const data = await fetchProducts(search_term, filter, topN, country, comparisonWebsites);
+      const data = await fetchProducts(searchTerm, filter, topN, country, comparisonWebsites);
       setResults(data.products);
       setHasSearch(!!data.products);
     } catch (error) {

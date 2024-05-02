@@ -9,7 +9,7 @@ import DefaultModal from "../components/modals/DefaultModal";
 import DefaultPills from "../components/pills/DefaultPills";
 
 // Api
-import { getSearchHistory } from "../api/searchs";
+import { getSearchHistory, search } from '../api/searchs';
 
 const Dashboard = () => {
   const [searchHistory, setSearchHistory] = useState([]);
@@ -36,6 +36,18 @@ const Dashboard = () => {
     }
   }
   
+  const initSearch = (searchData) => {
+    console.log(searchData);
+    const token = localStorage.getItem('access');
+    search(searchData, token)
+      .then((response) => {
+        console.log(response)
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+  
   useEffect(() => {
     const token = localStorage.getItem('access');
     getSearchHistory(token)
@@ -56,7 +68,7 @@ const Dashboard = () => {
         preferedTheme === 'dark' ? 'bg-lighterDark' : 'bg-darkerWhite',
       )}>
         {
-          showNewSearchModal && <DefaultModal onClose={() => setShowNewSearchModal(false)} />
+          showNewSearchModal && <DefaultModal onClose={() => setShowNewSearchModal(false)} onAction={(searchData) => initSearch(searchData)} />
         }
         <div className={classNames('px-4', 'py-2')}>
           <h1 className={classNames(

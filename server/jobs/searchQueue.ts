@@ -12,8 +12,8 @@ import { findProductsOnAmazon } from '@/scrapers/amazon-scraper';
 const DB_URI = process.env.MONGODB_URI ?? 'mongodb://localhost:27017';
 const DB_NAME = process.env.MONGODB__CACHE_DBNAME ?? 'cache';
 
-console.log("DB_URI", DB_URI);
-console.log("DB_NAME", DB_NAME);
+// console.log("DB_URI", DB_URI);
+// console.log("DB_NAME", DB_NAME);
 
 const client = await MongoClient.connect(`${DB_URI}/${DB_NAME}`);
 const db = client.db(DB_NAME);

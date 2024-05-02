@@ -10,7 +10,7 @@ const ComparisonForm = ({ searchTerm, onSearchTermChange, onCompare }) => {
   const AVAILABLE_STORES = ["Amazon", "Flipkart", "Snapdeal", "Alibaba"];  // TODO: store in db, env ?
   
   const [formData, setFormData] = useState({
-    search_term: "",
+    searchTerm: "",
     filter: "",
     topN: 3,
     comparisonWebsites: ["amazon", "flipkart", "snapdeal", "alibaba"],
@@ -31,7 +31,7 @@ const ComparisonForm = ({ searchTerm, onSearchTermChange, onCompare }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    formData.search_term = searchTerm;
+    formData.searchTerm = searchTerm;
     formData.country = "IN";
 
     console.log(`Form Data: ${JSON.stringify(formData)}`)
@@ -44,7 +44,7 @@ const ComparisonForm = ({ searchTerm, onSearchTermChange, onCompare }) => {
         <form onSubmit={handleSubmit} className="flex flex-col w-full gap-2 m-0">
           <DefaultInput
             id="searchTerm"
-            name="search_term"
+            name="searchTerm"
             placeholder="Enter Search Term"
             value={searchTerm}
             onChange={(e) => onSearchTermChange(e.target.value)}

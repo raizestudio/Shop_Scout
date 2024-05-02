@@ -1,16 +1,24 @@
 import React from "react";
-import PropTypes from "prop-types";
 
-const DefaultSelect = ({ id, name, value, className, onChange, options }) => {
+type DefaultSelectProps = {
+  id: string;
+  name: string;
+  value: string;
+  classes: string;
+  onChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+  options: Array<string>;
+};
+
+const DefaultSelect = (props: DefaultSelectProps) => {
   return (
     <select
-      id={id}
-      name={name}
-      className={className || "text-white m-0 bg-transparent border border-white rounded-full focus:border-teleMagenta focus:ring-0 py-3 px-6"}
-      value={value}
-      onChange={onChange}
+      id={props.id}
+      name={props.name}
+      className={props.classes || "text-white m-0 bg-transparent border border-white rounded-full focus:border-teleMagenta focus:ring-0 py-3 px-6"}
+      value={props.value}
+      onChange={props.onChange}
     >
-      {options.map((option, index) => (
+      {props.options.map((option, index) => (
         <option key={index} value={option} className="text-gray-800">
           {option}
         </option>
@@ -18,17 +26,5 @@ const DefaultSelect = ({ id, name, value, className, onChange, options }) => {
     </select>
   );
 }
-
-DefaultSelect.propTypes = {
-  id: PropTypes.string,
-  name: PropTypes.string,
-  value: PropTypes.string,
-  className: PropTypes.string,
-  onChange: PropTypes.func,
-  options: PropTypes.arrayOf(PropTypes.shape({
-    value: PropTypes.string,
-    text: PropTypes.string,
-  })),
-};
 
 export default DefaultSelect;

@@ -30,15 +30,15 @@ const Hero = ({searchTerm, onSearchTermChange, onCompare}) => {
     comparisonWebsites: ["Amazon", "Flipkart", "Snapdeal", "Alibaba"],
   });
 
-  
+  /*
+   * Handle search form submission
+   *
+   * @param e - Event object
+   */
   const handleSearch = (e) => {
-    /*
-    * Handle search form submission
-    *
-    * @param e - Event object
-    */
+    
     e.preventDefault();
-    formData.search_term = searchTerm;
+    formData.searchTerm = searchTerm;
     formData.country = "IN";
     onCompare(formData);
   };
